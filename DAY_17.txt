@@ -1,0 +1,578 @@
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 19
+Server version: 8.0.46 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> CREATE DATABASE companydb;
+Query OK, 1 row affected (0.08 sec)
+
+mysql>
+mysql> USE companydb;
+Database changed
+mysql>
+mysql> CREATE TABLE employees (
+    ->     emp_id INT PRIMARY KEY,
+    ->     emp_name VARCHAR(50),
+    ->     department VARCHAR(50),
+    ->     salary DECIMAL(10,2),
+    ->     experience INT,
+    ->     city VARCHAR(50),
+    ->     age INT
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+mysql>
+mysql> INSERT INTO employees
+    -> VALUES
+    -> (101, 'Ravi', 'IT', 45000, 2, 'Hyderabad', 24),
+    -> (102, 'Kiran', 'HR', 40000, 3, 'Vijayawada', 27),
+    -> (103, 'Suresh', 'IT', 55000, 5, 'Hyderabad', 30),
+    -> (104, 'Anil', 'Sales', 35000, 1, 'Chennai', 23),
+    -> (105, 'Priya', 'Finance', 60000, 6, 'Bangalore', 32),
+    -> (106, 'Sneha', 'IT', 50000, 4, 'Vizag', 28),
+    -> (107, 'Rahul', 'HR', 42000, 2, 'Hyderabad', 25),
+    -> (108, 'Arjun', 'Sales', 38000, 3, 'Chennai', 26),
+    -> (109, 'Divya', 'Finance', 65000, 7, 'Bangalore', 34),
+    -> (110, 'Manoj', 'IT', 70000, 8, 'Hyderabad', 35);
+Query OK, 10 rows affected (0.01 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> select*from employees;
++--------+----------+------------+----------+------------+------------+------+
+| emp_id | emp_name | department | salary   | experience | city       | age  |
++--------+----------+------------+----------+------------+------------+------+
+|    101 | Ravi     | IT         | 45000.00 |          2 | Hyderabad  |   24 |
+|    102 | Kiran    | HR         | 40000.00 |          3 | Vijayawada |   27 |
+|    103 | Suresh   | IT         | 55000.00 |          5 | Hyderabad  |   30 |
+|    104 | Anil     | Sales      | 35000.00 |          1 | Chennai    |   23 |
+|    105 | Priya    | Finance    | 60000.00 |          6 | Bangalore  |   32 |
+|    106 | Sneha    | IT         | 50000.00 |          4 | Vizag      |   28 |
+|    107 | Rahul    | HR         | 42000.00 |          2 | Hyderabad  |   25 |
+|    108 | Arjun    | Sales      | 38000.00 |          3 | Chennai    |   26 |
+|    109 | Divya    | Finance    | 65000.00 |          7 | Bangalore  |   34 |
+|    110 | Manoj    | IT         | 70000.00 |          8 | Hyderabad  |   35 |
++--------+----------+------------+----------+------------+------------+------+
+10 rows in set (0.00 sec)
+
+mysql> select*from employees where emp_id=101;
++--------+----------+------------+----------+------------+-----------+------+
+| emp_id | emp_name | department | salary   | experience | city      | age  |
++--------+----------+------------+----------+------------+-----------+------+
+|    101 | Ravi     | IT         | 45000.00 |          2 | Hyderabad |   24 |
++--------+----------+------------+----------+------------+-----------+------+
+1 row in set (0.00 sec)
+
+mysql> DELIMMITER //
+    -> CREATE PROCEDURE get_emp_details_byemid(IN EID INT)
+    -> BEGIN
+    -> SELECT*FROM EMPLOYEES WHERE EMP_ID=EID;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'DELIMMITER //
+CREATE PROCEDURE get_emp_details_byemid(IN EID INT)
+BEGIN
+SELECT*' at line 1
+mysql> DELIMMITER //
+    -> CREATE PROCEDURE get_emp_details_byemid(IN EID INT)
+    -> BEGIN
+    -> SELECT*FROM EMPLOYEES WHERE EMP_ID=EID^C
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE get_emp_details_byemid(IN EID INT)
+    -> BEGIN
+    -> SELECT*FROM EMPLOYEES WHERE EMP_ID=EID;
+    -> END //
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> DELIMITER;
+    -> ^C
+mysql> DELIMITER ;
+mysql> CALL get_emp_details_byempid(101);
+ERROR 1305 (42000): PROCEDURE companydb.get_emp_details_byempid does not exist
+mysql> CALL get_emp_details_byempid(101);
+ERROR 1305 (42000): PROCEDURE companydb.get_emp_details_byempid does not exist
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE get_dept(IN DEPT_NAME VARCHAR)
+    -> BEGIN
+    -> SELECT emp_id,emp_name,department FROM EMPLOYEES WHERE department=DEPT_NAME;
+    -> END //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')
+BEGIN
+SELECT emp_id,emp_name,department FROM EMPLOYEES WHERE department=DEPT_N' at line 1
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_dept(IN DEPT_NAME VARCHAR)
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE department=DEPT_NAME;
+    ->    END //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')
+  BEGIN
+    SELECT*FROM EMPLOYEES WHERE department=DEPT_NAME;
+   END' at line 1
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_dept(IN DEPT_NAME VARCHAR(10))
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE department=DEPT_NAME;
+    ->    END //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> DELIMITER ;
+mysql> CALL GET_DEPT("IT");
++--------+----------+------------+----------+------------+-----------+------+
+| emp_id | emp_name | department | salary   | experience | city      | age  |
++--------+----------+------------+----------+------------+-----------+------+
+|    101 | Ravi     | IT         | 45000.00 |          2 | Hyderabad |   24 |
+|    103 | Suresh   | IT         | 55000.00 |          5 | Hyderabad |   30 |
+|    106 | Sneha    | IT         | 50000.00 |          4 | Vizag     |   28 |
+|    110 | Manoj    | IT         | 70000.00 |          8 | Hyderabad |   35 |
++--------+----------+------------+----------+------------+-----------+------+
+4 rows in set (0.07 sec)
+
+Query OK, 0 rows affected (0.09 sec)
+
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_EMP(IN SALARY DECIMAL(10,2))
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE SALARY=SALARY;
+    ->    END //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DELIMITER;
+    -> ^C
+mysql> DELIMITER ;
+mysql> CALL GET_EMP(50000);
++--------+----------+------------+----------+------------+------------+------+
+| emp_id | emp_name | department | salary   | experience | city       | age  |
++--------+----------+------------+----------+------------+------------+------+
+|    101 | Ravi     | IT         | 45000.00 |          2 | Hyderabad  |   24 |
+|    102 | Kiran    | HR         | 40000.00 |          3 | Vijayawada |   27 |
+|    103 | Suresh   | IT         | 55000.00 |          5 | Hyderabad  |   30 |
+|    104 | Anil     | Sales      | 35000.00 |          1 | Chennai    |   23 |
+|    105 | Priya    | Finance    | 60000.00 |          6 | Bangalore  |   32 |
+|    106 | Sneha    | IT         | 50000.00 |          4 | Vizag      |   28 |
+|    107 | Rahul    | HR         | 42000.00 |          2 | Hyderabad  |   25 |
+|    108 | Arjun    | Sales      | 38000.00 |          3 | Chennai    |   26 |
+|    109 | Divya    | Finance    | 65000.00 |          7 | Bangalore  |   34 |
+|    110 | Manoj    | IT         | 70000.00 |          8 | Hyderabad  |   35 |
++--------+----------+------------+----------+------------+------------+------+
+10 rows in set (0.00 sec)
+
+Query OK, 0 rows affected (0.07 sec)
+
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_EMP(IN INCOME DECIMAL(10,2))
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE SALARY>INCOME;
+    ->    END //
+ERROR 1304 (42000): PROCEDURE get_EMP already exists
+mysql> DELIMITER //
+mysql>  CREATE PROCEDURE get_EMP_DATA(IN INCOME DECIMAL(10,2))
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE SALARY>INCOME;
+    ->    END //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DELIMITER ;
+mysql> Call get_emp_data(5000);
++--------+----------+------------+----------+------------+------------+------+
+| emp_id | emp_name | department | salary   | experience | city       | age  |
++--------+----------+------------+----------+------------+------------+------+
+|    101 | Ravi     | IT         | 45000.00 |          2 | Hyderabad  |   24 |
+|    102 | Kiran    | HR         | 40000.00 |          3 | Vijayawada |   27 |
+|    103 | Suresh   | IT         | 55000.00 |          5 | Hyderabad  |   30 |
+|    104 | Anil     | Sales      | 35000.00 |          1 | Chennai    |   23 |
+|    105 | Priya    | Finance    | 60000.00 |          6 | Bangalore  |   32 |
+|    106 | Sneha    | IT         | 50000.00 |          4 | Vizag      |   28 |
+|    107 | Rahul    | HR         | 42000.00 |          2 | Hyderabad  |   25 |
+|    108 | Arjun    | Sales      | 38000.00 |          3 | Chennai    |   26 |
+|    109 | Divya    | Finance    | 65000.00 |          7 | Bangalore  |   34 |
+|    110 | Manoj    | IT         | 70000.00 |          8 | Hyderabad  |   35 |
++--------+----------+------------+----------+------------+------------+------+
+10 rows in set (0.08 sec)
+
+Query OK, 0 rows affected (0.13 sec)
+
+mysql> Call get_emp_data(5000.00);
++--------+----------+------------+----------+------------+------------+------+
+| emp_id | emp_name | department | salary   | experience | city       | age  |
++--------+----------+------------+----------+------------+------------+------+
+|    101 | Ravi     | IT         | 45000.00 |          2 | Hyderabad  |   24 |
+|    102 | Kiran    | HR         | 40000.00 |          3 | Vijayawada |   27 |
+|    103 | Suresh   | IT         | 55000.00 |          5 | Hyderabad  |   30 |
+|    104 | Anil     | Sales      | 35000.00 |          1 | Chennai    |   23 |
+|    105 | Priya    | Finance    | 60000.00 |          6 | Bangalore  |   32 |
+|    106 | Sneha    | IT         | 50000.00 |          4 | Vizag      |   28 |
+|    107 | Rahul    | HR         | 42000.00 |          2 | Hyderabad  |   25 |
+|    108 | Arjun    | Sales      | 38000.00 |          3 | Chennai    |   26 |
+|    109 | Divya    | Finance    | 65000.00 |          7 | Bangalore  |   34 |
+|    110 | Manoj    | IT         | 70000.00 |          8 | Hyderabad  |   35 |
++--------+----------+------------+----------+------------+------------+------+
+10 rows in set (0.04 sec)
+
+Query OK, 0 rows affected (0.11 sec)
+
+mysql> Call get_emp_data(50000.00);
++--------+----------+------------+----------+------------+-----------+------+
+| emp_id | emp_name | department | salary   | experience | city      | age  |
++--------+----------+------------+----------+------------+-----------+------+
+|    103 | Suresh   | IT         | 55000.00 |          5 | Hyderabad |   30 |
+|    105 | Priya    | Finance    | 60000.00 |          6 | Bangalore |   32 |
+|    109 | Divya    | Finance    | 65000.00 |          7 | Bangalore |   34 |
+|    110 | Manoj    | IT         | 70000.00 |          8 | Hyderabad |   35 |
++--------+----------+------------+----------+------------+-----------+------+
+4 rows in set (0.00 sec)
+
+Query OK, 0 rows affected (0.04 sec)
+
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_SAL_RANGE(IN MINSAL DECIMAL(10,2),IN MAXSAL DECILMAL(10,2)
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE SALARY BETWEEM minsal AND maxsal;
+    ->    END //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'DECILMAL(10,2)
+  BEGIN
+    SELECT*FROM EMPLOYEES WHERE SALARY BETWEEM minsal AND' at line 1
+mysql> DELIMITER ;
+mysql> call get_sal_range(20000,50000);
+ERROR 1305 (42000): PROCEDURE companydb.get_sal_range does not exist
+mysql> CALL get_SAL_RANGE(50000,70000);
+ERROR 1305 (42000): PROCEDURE companydb.get_SAL_RANGE does not exist
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_SAL_RANGE(IN MINSAL DECIMAL(10,2),IN MAXSAL DECILMAL(10,2)
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE SALARY BETWEEN minsal AND maxsal;
+    ->    END //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'DECILMAL(10,2)
+  BEGIN
+    SELECT*FROM EMPLOYEES WHERE SALARY BETWEEN minsal AND' at line 1
+mysql> DELIMITER ;
+mysql> CALL get_SAL_RANGE(50000,70000);
+ERROR 1305 (42000): PROCEDURE companydb.get_SAL_RANGE does not exist
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_SAL_RANGE(IN MINSAL DECIMAL(10,2),IN MAXSAL DECILMAL(10,2))
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE SALARY BETWEEN minsal AND maxsal;
+    ->    END //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'DECILMAL(10,2))
+  BEGIN
+    SELECT*FROM EMPLOYEES WHERE SALARY BETWEEN minsal AN' at line 1
+mysql> DELIMITER ;
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_SAL_RANGE(IN MINSAL DECIMAL(10,2),IN MAXSAL DECILMAL(10,2))
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE SALARY BETWEEN MINSAL AND MAXSAL;
+    ->    END //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'DECILMAL(10,2))
+  BEGIN
+    SELECT*FROM EMPLOYEES WHERE SALARY BETWEEN MINSAL AN' at line 1
+mysql> DELIMITER ;
+mysql>
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_SAL_RANGE(IN MINSAL Decimal(8,2),IN MAXSAL Decimal(8,2))
+    ->   BEGIN
+    ->     SELECT*FROM EMPLOYEES WHERE SALARY BETWEEN MINSAL AND MAXSAL;
+    ->    END //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DELIMITER ;
+mysql> CALL get_SAL_RANGE(50000,70000);
++--------+----------+------------+----------+------------+-----------+------+
+| emp_id | emp_name | department | salary   | experience | city      | age  |
++--------+----------+------------+----------+------------+-----------+------+
+|    103 | Suresh   | IT         | 55000.00 |          5 | Hyderabad |   30 |
+|    105 | Priya    | Finance    | 60000.00 |          6 | Bangalore |   32 |
+|    106 | Sneha    | IT         | 50000.00 |          4 | Vizag     |   28 |
+|    109 | Divya    | Finance    | 65000.00 |          7 | Bangalore |   34 |
+|    110 | Manoj    | IT         | 70000.00 |          8 | Hyderabad |   35 |
++--------+----------+------------+----------+------------+-----------+------+
+5 rows in set (0.00 sec)
+
+Query OK, 0 rows affected (0.04 sec)
+
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_emp_dept(IN  dept varchar(10))
+    ->   BEGIN
+    ->     SELECT emp_name,department,experience FROM EMPLOYEES WHERE department=dept and experience>5;
+    ->    END //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> DELIMITER ;
+mysql> call get_emp_dept(it);
+ERROR 1054 (42S22): Unknown column 'it' in 'field list'
+mysql> call get_emp_dept("it");
++----------+------------+------------+
+| emp_name | department | experience |
++----------+------------+------------+
+| Manoj    | IT         |          8 |
++----------+------------+------------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call get_emp_dept("finance");
++----------+------------+------------+
+| emp_name | department | experience |
++----------+------------+------------+
+| Priya    | Finance    |          6 |
+| Divya    | Finance    |          7 |
++----------+------------+------------+
+2 rows in set (0.00 sec)
+
+Query OK, 0 rows affected (0.02 sec)
+
+mysql>  DELIMITER //
+mysql>  CREATE PROCEDURE get_emp_dept2(IN  dept varchar(10),IN EXP INT)
+    ->   BEGIN
+    ->     SELECT emp_name,department,experience FROM EMPLOYEES WHERE department=dept and experience>EXP;
+    ->    END //
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> DELIMITER ;
+mysql> call get_emp_dept("finance",4);
+ERROR 1318 (42000): Incorrect number of arguments for PROCEDURE companydb.get_emp_dept; expected 1, got 2
+mysql> call get_emp_dept2("finance",4);
++----------+------------+------------+
+| emp_name | department | experience |
++----------+------------+------------+
+| Priya    | Finance    |          6 |
+| Divya    | Finance    |          7 |
++----------+------------+------------+
+2 rows in set (0.00 sec)
+
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> call get_emp_dept2("finance",6);
++----------+------------+------------+
+| emp_name | department | experience |
++----------+------------+------------+
+| Divya    | Finance    |          7 |
++----------+------------+------------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> SHOW PROCEDURE STATUS WHERE DB=DATBASE();
+ERROR 1305 (42000): FUNCTION companydb.DATBASE does not exist
+mysql> SHOW PROCEDURE STATUS WHERE Db=DATBASE();
+ERROR 1305 (42000): FUNCTION companydb.DATBASE does not exist
+mysql> SHOW PROCEDURE STATUS WHERE Db=DATABASE();
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+| Db        | Name                   | Type      | Definer        | Modified            | Created             | Security_type | Comment | character_set_client | collation_connection | Database Collation |
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+| companydb | get_dept               | PROCEDURE | root@localhost | 2026-10-07 12:04:05 | 2026-10-07 12:04:05 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_EMP                | PROCEDURE | root@localhost | 2026-10-07 12:06:57 | 2026-10-07 12:06:57 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_EMP_DATA           | PROCEDURE | root@localhost | 2026-10-07 12:09:55 | 2026-10-07 12:09:55 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_emp_dept           | PROCEDURE | root@localhost | 2026-10-07 12:26:51 | 2026-10-07 12:26:51 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_emp_dept2          | PROCEDURE | root@localhost | 2026-10-07 12:29:34 | 2026-10-07 12:29:34 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_emp_details_byemid | PROCEDURE | root@localhost | 2026-10-07 11:56:03 | 2026-10-07 11:56:03 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_SAL_RANGE          | PROCEDURE | root@localhost | 2026-10-07 12:22:44 | 2026-10-07 12:22:44 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+7 rows in set (0.07 sec)
+
+mysql> DROP PROCEDURE GET_EMP_DEPT;
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> SHOW PROCEDURE STATUS WHERE Db=DATABASE();
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+| Db        | Name                   | Type      | Definer        | Modified            | Created             | Security_type | Comment | character_set_client | collation_connection | Database Collation |
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+| companydb | get_dept               | PROCEDURE | root@localhost | 2026-10-07 12:04:05 | 2026-10-07 12:04:05 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_EMP                | PROCEDURE | root@localhost | 2026-10-07 12:06:57 | 2026-10-07 12:06:57 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_EMP_DATA           | PROCEDURE | root@localhost | 2026-10-07 12:09:55 | 2026-10-07 12:09:55 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_emp_dept2          | PROCEDURE | root@localhost | 2026-10-07 12:29:34 | 2026-10-07 12:29:34 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_emp_details_byemid | PROCEDURE | root@localhost | 2026-10-07 11:56:03 | 2026-10-07 11:56:03 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_SAL_RANGE          | PROCEDURE | root@localhost | 2026-10-07 12:22:44 | 2026-10-07 12:22:44 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+6 rows in set (0.00 sec)
+
+mysql>  DELIMITER //
+mysql> CREATE PROCEDUER GET_MAX_SAL(OUT MAX INT)
+    -> BEGIN
+    -> SELECT MAX(SALARY) INTO MAX FROM EMPLOYEES;
+    -> END //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'PROCEDUER GET_MAX_SAL(OUT MAX INT)
+BEGIN
+SELECT MAX(SALARY) INTO MAX FROM EMPLOY' at line 1
+mysql> DELIMITER;
+    -> ^C
+mysql> DELIMITER //
+mysql> CREATE PROCEDUER GET_MAX_SAL(OUT Max_sal INT)
+    -> BEGIN
+    -> SELECT MAX(SALARY) INTO Max_sal FROM EMPLOYEES;
+    -> END //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'PROCEDUER GET_MAX_SAL(OUT Max_sal INT)
+BEGIN
+SELECT MAX(SALARY) INTO Max_sal FRO' at line 1
+mysql> DELIMITER;
+    ->
+    -> ^C
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE GET_MAX_SAL(OUT Max_sal INT)
+    -> BEGIN
+    -> SELECT MAX(SALARY) INTO Max_sal FROM EMPLOYEES;
+    -> END //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DELIMITER ;
+mysql> CALL GET_MAX_SAL(@S);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> SELECT @S;
++-------+
+| @S    |
++-------+
+| 70000 |
++-------+
+1 row in set (0.04 sec)
+
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE GET_MAX_SAL(OUT Max_sal INT)
+    -> BEGIN
+    -> SELECT MAX(SALARY) INTO Max_sal FROM EMPLOYEES;
+    -> END //
+ERROR 1304 (42000): PROCEDURE GET_MAX_SAL already exists
+mysql> DELIMITER ;
+mysql> CALL GET_MAX_SAL(@S);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE GET_DEPT_COUNT(OUT DEPT INT)
+    -> BEGIN
+    -> SELECT COUNT(DEPATRMENT) INTO DEPT FROM EMPLOYEES WHERE DEPARTMENT='IT';
+    -> END //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> DELIMITER ;
+mysql> CALL GET_DEPT_COUNT(@D);
+ERROR 1054 (42S22): Unknown column 'DEPATRMENT' in 'field list'
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE GET_DEPT_COUNT(OUT DEPT INT)
+    -> BEGIN
+    -> SELECT COUNT(*) INTO DEPT FROM EMPLOYEES WHERE DEPARTMENT='IT';
+    -> END //
+ERROR 1304 (42000): PROCEDURE GET_DEPT_COUNT already exists
+mysql> DELIMITER ;
+mysql> CALL GET_DEPT_COUNT(@D);
+ERROR 1054 (42S22): Unknown column 'DEPATRMENT' in 'field list'
+mysql> DROP PROCEDURE GET_DEPT_count;
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE GET_DEPT_COUNT(OUT DEPT INT)
+    -> BEGIN
+    -> SELECT COUNT(*) INTO DEPT FROM EMPLOYEES WHERE DEPARTMENT='IT';
+    -> END //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> DELIMITER ;
+mysql> CALL GET_DEPT_COUNT(@D);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select @D
+    -> ;
++------+
+| @D   |
++------+
+|    4 |
++------+
+1 row in set (0.00 sec)
+
+mysql>
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE GET_DEPT_COUNT(OUT DEPT INT)
+    -> BEGIN
+    -> SELECT COUNT(*) INTO DEPT FROM EMPLOYEES WHERE DEPARTMENT='IT';
+    -> END //
+ERROR 1304 (42000): PROCEDURE GET_DEPT_COUNT already exists
+mysql> DELIMITER ;
+mysql> CALL GET_DEPT_COUNT(@dp);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE GET_DEPT_COUNT2(OUT DEPT INT)
+    -> BEGIN
+    -> SELECT COUNT(department) INTO DEPT FROM EMPLOYEES WHERE DEPARTMENT='IT';
+    -> END //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> DELIMITER ;
+mysql> CALL GET_DEPT_COUNT2(@DP);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select @DP;
++------+
+| @DP  |
++------+
+|    4 |
++------+
+1 row in set (0.00 sec)
+
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE ADDBONUS(IN EMP_ID INT,INOUT BONUS DECIMAL(10,2))
+    -> BEGIN
+    -> UPDATE EMPLOYEES SET SALARY=SALARY+BONUS WHERE EMP_ID=EMPID;
+    -> SELECT SALARY INTO BONUS FROM EMPLOYEES WHERE EMP_ID=EMPID;
+    -> END //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> DELIMITER ;
+mysql> SET @B=1000;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> CALL ADDBONUS(101,@B);
+ERROR 1054 (42S22): Unknown column 'EMPID' in 'where clause'
+mysql> SELECT @B;
++------+
+| @B   |
++------+
+| 1000 |
++------+
+1 row in set (0.00 sec)
+
+mysql>  SHOW PROCEDURE STATUS WHERE Db=DATABASE();
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+| Db        | Name                   | Type      | Definer        | Modified            | Created             | Security_type | Comment | character_set_client | collation_connection | Database Collation |
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+| companydb | ADDBONUS               | PROCEDURE | root@localhost | 2026-10-07 13:02:30 | 2026-10-07 13:02:30 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_dept               | PROCEDURE | root@localhost | 2026-10-07 12:04:05 | 2026-10-07 12:04:05 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | GET_DEPT_COUNT         | PROCEDURE | root@localhost | 2026-10-07 12:48:59 | 2026-10-07 12:48:59 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | GET_DEPT_COUNT2        | PROCEDURE | root@localhost | 2026-10-07 12:51:47 | 2026-10-07 12:51:47 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_EMP                | PROCEDURE | root@localhost | 2026-10-07 12:06:57 | 2026-10-07 12:06:57 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_EMP_DATA           | PROCEDURE | root@localhost | 2026-10-07 12:09:55 | 2026-10-07 12:09:55 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_emp_dept2          | PROCEDURE | root@localhost | 2026-10-07 12:29:34 | 2026-10-07 12:29:34 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_emp_details_byemid | PROCEDURE | root@localhost | 2026-10-07 11:56:03 | 2026-10-07 11:56:03 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | GET_MAX_SAL            | PROCEDURE | root@localhost | 2026-10-07 12:43:57 | 2026-10-07 12:43:57 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| companydb | get_SAL_RANGE          | PROCEDURE | root@localhost | 2026-10-07 12:22:44 | 2026-10-07 12:22:44 | DEFINER       |         | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
++-----------+------------------------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+
+10 rows in set (0.00 sec)
+
+mysql> DROP PROCEDURE ADDBONUS;
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE ADDBONUS(IN EMPID INT,INOUT BONUS DECIMAL(10,2))
+    -> BEGIN
+    -> UPDATE EMPLOYEES SET SALARY=SALARY+BONUS WHERE EMP_ID=EMPID;
+    -> SELECT SALARY INTO BONUS FROM EMPLOYEES WHERE EMP_ID=EMPID;
+    -> END //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DELIMITER ;
+mysql> SET @B=1000;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> CALL ADDBONUS(101,@B);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> SELECT @B;
++----------+
+| @B       |
++----------+
+| 46000.00 |
++----------+
+1 row in set (0.00 sec)
+
