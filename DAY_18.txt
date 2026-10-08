@@ -1,0 +1,1128 @@
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 20
+Server version: 8.0.46 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> help
+
+For information about MySQL products and services, visit:
+   http://www.mysql.com/
+For developer information, including the MySQL Reference Manual, visit:
+   http://dev.mysql.com/
+To buy MySQL Enterprise support, training, or other products, visit:
+   https://shop.mysql.com/
+
+List of all MySQL commands:
+Note that all text commands must be first on line and end with ';'
+?         (\?) Synonym for `help'.
+clear     (\c) Clear the current input statement.
+connect   (\r) Reconnect to the server. Optional arguments are db and host.
+delimiter (\d) Set statement delimiter.
+ego       (\G) Send command to mysql server, display result vertically.
+exit      (\q) Exit mysql. Same as quit.
+go        (\g) Send command to mysql server.
+help      (\h) Display this help.
+notee     (\t) Don't write into outfile.
+print     (\p) Print current command.
+prompt    (\R) Change your mysql prompt.
+quit      (\q) Quit mysql.
+rehash    (\#) Rebuild completion hash.
+source    (\.) Execute an SQL script file. Takes a file name as an argument.
+status    (\s) Get status information from the server.
+system    (\!) Execute a system shell command, if enabled
+tee       (\T) Set outfile [to_outfile]. Append everything into given outfile.
+use       (\u) Use another database. Takes database name as argument.
+charset   (\C) Switch to another charset. Might be needed for processing binlog with multi-byte charsets.
+warnings  (\W) Show warnings after every statement.
+nowarning (\w) Don't show warnings after every statement.
+resetconnection(\x) Clean session context.
+query_attributes Sets string parameters (name1 value1 name2 value2 ...) for the next query to pick up.
+ssl_session_data_print Serializes the current SSL session data to stdout or file
+
+For server side help, type 'help contents'
+
+mysql> use pfs7;
+Database changed
+mysql> show tables;
++----------------+
+| Tables_in_pfs7 |
++----------------+
+| customers      |
+| orders         |
+| products       |
+| student        |
+| students       |
++----------------+
+5 rows in set (0.01 sec)
+
+mysql>
+mysql>
+mysql> CREATE TABLE Employees (
+    ->     emp_id INT PRIMARY KEY,
+    ->     emp_name VARCHAR(50),
+    ->     department VARCHAR(30),
+    ->     salary DECIMAL(10,2),
+    ->     experience INT,
+    ->     city VARCHAR(30)
+    -> );
+Query OK, 0 rows affected (0.08 sec)
+
+mysql>
+mysql>
+mysql>
+mysql> INSERT INTO Employees VALUES
+    -> (101,'Rahul','IT',65000,5,'Hyderabad'),
+    -> (102,'Priya','HR',45000,3,'Chennai'),
+    -> (103,'Amit','Finance',70000,6,'Bangalore'),
+    -> (104,'Sneha','IT',80000,8,'Hyderabad'),
+    -> (105,'Kiran','Sales',40000,2,'Pune');
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql>
+mysql>
+mysql>
+mysql>
+mysql> CREATE TABLE Employee_Audit(
+    ->     audit_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     emp_id INT,
+    ->     action_type VARCHAR(20),
+    ->     old_salary DECIMAL(10,2),
+    ->     new_salary DECIMAL(10,2),
+    ->     action_time DATETIME
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> select*from employees;
++--------+----------+------------+----------+------------+-----------+
+| emp_id | emp_name | department | salary   | experience | city      |
++--------+----------+------------+----------+------------+-----------+
+|    101 | Rahul    | IT         | 65000.00 |          5 | Hyderabad |
+|    102 | Priya    | HR         | 45000.00 |          3 | Chennai   |
+|    103 | Amit     | Finance    | 70000.00 |          6 | Bangalore |
+|    104 | Sneha    | IT         | 80000.00 |          8 | Hyderabad |
+|    105 | Kiran    | Sales      | 40000.00 |          2 | Pune      |
++--------+----------+------------+----------+------------+-----------+
+5 rows in set (0.00 sec)
+
+mysql> desc employees_audit;
+ERROR 1146 (42S02): Table 'pfs7.employees_audit' doesn't exist
+mysql> desc employee_audit;
++-------------+---------------+------+-----+---------+----------------+
+| Field       | Type          | Null | Key | Default | Extra          |
++-------------+---------------+------+-----+---------+----------------+
+| audit_id    | int           | NO   | PRI | NULL    | auto_increment |
+| emp_id      | int           | YES  |     | NULL    |                |
+| action_type | varchar(20)   | YES  |     | NULL    |                |
+| old_salary  | decimal(10,2) | YES  |     | NULL    |                |
+| new_salary  | decimal(10,2) | YES  |     | NULL    |                |
+| action_time | datetime      | YES  |     | NULL    |                |
++-------------+---------------+------+-----+---------+----------------+
+6 rows in set (0.07 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_beforf_insert_sal
+    -> before insert
+    -> on employees
+    -> for each row
+    -> begin
+    ->  if new.salary<20000 then
+    ->  signal sqlstate '45000'
+    ->  set message_text='salary cannot be less than 20000';
+    ->  end if;
+    -> end //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> delimiter ;
+mysql> insert into employess values
+    -> (101,'Ramesh','IT',16289,6,'vizag');
+ERROR 1146 (42S02): Table 'pfs7.employess' doesn't exist
+mysql> insert into employees values
+    -> (101,'Ramesh','IT',16289,6,'vizag');
+ERROR 1644 (45000): salary cannot be less than 20000
+mysql> insert into employess values
+    -> (101,'Ramesh','IT',21000,6,'vizag');
+ERROR 1146 (42S02): Table 'pfs7.employess' doesn't exist
+mysql> insert into employees values
+    -> (101,'Ramesh','IT',21000,6,'vizag');
+ERROR 1062 (23000): Duplicate entry '101' for key 'employees.PRIMARY'
+mysql> insert into employees values
+    -> (106,'Ramesh','IT',21000,6,'vizag');
+Query OK, 1 row affected (0.07 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_insert_sal
+    -> after insert
+    -> on employees
+    -> for each row
+    -> begin
+    ->  insert into employee_audit
+    ->  (emp_id, action_type, new_salary, action_time)
+    ->  values
+    ->  (new.emp_id,'INSERT',NEW.SALARY,NOW());
+    -> end //
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> delimiter ;
+mysql> INSERT INTO EMPLOYEES VALUES
+    -> (107,'RAKESH','BPO',20000,2,'VIZAG');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> SELECT*FROM EMPLOYEES;
++--------+----------+------------+----------+------------+-----------+
+| emp_id | emp_name | department | salary   | experience | city      |
++--------+----------+------------+----------+------------+-----------+
+|    101 | Rahul    | IT         | 65000.00 |          5 | Hyderabad |
+|    102 | Priya    | HR         | 45000.00 |          3 | Chennai   |
+|    103 | Amit     | Finance    | 70000.00 |          6 | Bangalore |
+|    104 | Sneha    | IT         | 80000.00 |          8 | Hyderabad |
+|    105 | Kiran    | Sales      | 40000.00 |          2 | Pune      |
+|    106 | Ramesh   | IT         | 21000.00 |          6 | vizag     |
+|    107 | RAKESH   | BPO        | 20000.00 |          2 | VIZAG     |
++--------+----------+------------+----------+------------+-----------+
+7 rows in set (0.00 sec)
+
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
++----------+--------+-------------+------------+------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> INSERT INTO EMPLOYEES VALUES
+    -> (108,'RENUKA','ACTORS',50000,2,Chenni);
+ERROR 1054 (42S22): Unknown column 'Chenni' in 'field list'
+mysql> (108,'RENUKA','ACTORS',50000,2,'Chennai');
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '108,'RENUKA','ACTORS',50000,2,'Chennai')' at line 1
+mysql> INSERT INTO EMPLOYEES VALUES
+    -> (108,'RENUKA','ACTORS',50000,2,'Chennai');
+Query OK, 1 row affected (0.05 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_beforf_update_sal
+    -> before update
+    -> on employees
+    -> for each row
+    -> begin
+    ->  if new.salary<old.salary then
+    ->  signal sqlstate '45000'
+    ->  set message_text='new salary cannot be redce';
+    ->  end if;
+    -> end //
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> delimiter ;
+mysql> update employees set salary=50000 where emp_id=101;
+ERROR 1644 (45000): new salary cannot be redce
+mysql> update employees set salary=65001.76 where emp_id=101;
+Query OK, 1 row affected (0.07 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> SELECT*FROM EMPLOYEES;
++--------+----------+------------+----------+------------+-----------+
+| emp_id | emp_name | department | salary   | experience | city      |
++--------+----------+------------+----------+------------+-----------+
+|    101 | Rahul    | IT         | 65001.76 |          5 | Hyderabad |
+|    102 | Priya    | HR         | 45000.00 |          3 | Chennai   |
+|    103 | Amit     | Finance    | 70000.00 |          6 | Bangalore |
+|    104 | Sneha    | IT         | 80000.00 |          8 | Hyderabad |
+|    105 | Kiran    | Sales      | 40000.00 |          2 | Pune      |
+|    106 | Ramesh   | IT         | 21000.00 |          6 | vizag     |
+|    107 | RAKESH   | BPO        | 20000.00 |          2 | VIZAG     |
+|    108 | RENUKA   | ACTORS     | 50000.00 |          2 | Chennai   |
++--------+----------+------------+----------+------------+-----------+
+8 rows in set (0.00 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_update_sal
+    -> after update
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salry, new_salary, action_time)
+    ->  values
+    ->  (OLD.emp_id,'UPDATE',OLD.SALARY,NEW.SALARY,NOW());
+    ->  end //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> delimiter ;
+mysql>
+mysql>
+mysql> UPDATE EMPLOYEES SET SALARY=60000 WHERE EMP_id=102;
+ERROR 1054 (42S22): Unknown column 'old_salry' in 'field list'
+mysql> show triggers;
++-----------------------+--------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger               | Event  | Table     | Statement                                                                                                                                                       | Timing | Created                | sql_mode                                                                                                              | Definer        | character_set_client | collation_connection | Database Collation |
++-----------------------+--------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| trg_beforf_insert_sal | INSERT | employees | begin
+ if new.salary<20000 then
+ signal sqlstate '45000'
+ set message_text='salary cannot be less than 20000';
+ end if;
+end                                     | BEFORE | 2026-10-08 11:39:37.27 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_insert_sal  | INSERT | employees | begin
+ insert into employee_audit
+ (emp_id, action_type, new_salary, action_time)
+ values
+ (new.emp_id,'INSERT',NEW.SALARY,NOW());
+end                          | AFTER  | 2026-10-08 11:50:50.09 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_beforf_update_sal | UPDATE | employees | begin
+ if new.salary<old.salary then
+ signal sqlstate '45000'
+ set message_text='new salary cannot be redce';
+ end if;
+end                                      | BEFORE | 2026-10-08 12:01:15.44 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_update_sal  | UPDATE | employees | begin
+   insert into employee_audit
+ (emp_id, action_type, old_salry, new_salary, action_time)
+ values
+ (OLD.emp_id,'UPDATE',OLD.SALARY,NEW.SALARY,NOW());
+ end | AFTER  | 2026-10-08 12:14:29.18 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
++-----------------------+--------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+4 rows in set (0.01 sec)
+
+mysql> drop trigger trg_after_update_sal;
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_update_sal
+    -> after update
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salary, new_salary, action_time)
+    ->  values
+    ->  (OLD.emp_id,'UPDATE',OLD.SALARY,NEW.SALARY,NOW());
+    ->  end //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> delimiter ;
+mysql>
+mysql>
+mysql> UPDATE EMPLOYEES SET SALARY=60000 WHERE EMP_id=102;
+Query OK, 1 row affected (0.05 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select*from employees;
++--------+----------+------------+----------+------------+-----------+
+| emp_id | emp_name | department | salary   | experience | city      |
++--------+----------+------------+----------+------------+-----------+
+|    101 | Rahul    | IT         | 65001.76 |          5 | Hyderabad |
+|    102 | Priya    | HR         | 60000.00 |          3 | Chennai   |
+|    103 | Amit     | Finance    | 70000.00 |          6 | Bangalore |
+|    104 | Sneha    | IT         | 80000.00 |          8 | Hyderabad |
+|    105 | Kiran    | Sales      | 40000.00 |          2 | Pune      |
+|    106 | Ramesh   | IT         | 21000.00 |          6 | vizag     |
+|    107 | RAKESH   | BPO        | 20000.00 |          2 | VIZAG     |
+|    108 | RENUKA   | ACTORS     | 50000.00 |          2 | Chennai   |
++--------+----------+------------+----------+------------+-----------+
+8 rows in set (0.00 sec)
+
+mysql> select*from employee_audit;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
++----------+--------+-------------+------------+------------+---------------------+
+3 rows in set (0.00 sec)
+
+mysql> update employees set salary=25000 where emp_id=107;
+Query OK, 1 row affected (0.05 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select*from employee_audit;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
++----------+--------+-------------+------------+------------+---------------------+
+4 rows in set (0.00 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg__before_delete_sal
+    -> before delete
+    -> on employees
+    -> for each row
+    -> begin
+    ->    if old.department='it' then
+    ->    signal sqlstate '45000'
+    ->    set message_text='You cannot delete IT employees';
+    ->    end if;
+    ->
+    ->   end //
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> delimiter ;
+mysql> delect from employees where emp_id=106;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'delect from employees where emp_id=106' at line 1
+mysql> delete from employees where emp_id=106;
+ERROR 1644 (45000): You cannot delete IT employees
+mysql> delete from employees where emp_id=108;
+Query OK, 1 row affected (0.10 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_delete_sal
+    -> after delete
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salary, new_salary, action_time)
+    ->  values
+    ->  (emp_id,'DELETE',OLD.SALARY,NEW.SALARY,NOW());
+    ->  end //
+ERROR 1363 (HY000): There is no NEW row in on DELETE trigger
+mysql> delimiter ;
+mysql> Delimiter //
+mysql> create trigger trg_after_delete_sal
+    -> after delete
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salary, action_time)
+    ->  values
+    ->  (emp_id,'DELETE',OLD.SALARY,NOW());
+    ->  end //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> delimiter ;
+mysql> DELETE FROM EMPLOYEES WHERE EMP_ID=106;
+ERROR 1644 (45000): You cannot delete IT employees
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
++----------+--------+-------------+------------+------------+---------------------+
+4 rows in set (0.00 sec)
+
+mysql> DELETE FROM EMPLOYEES WHERE EMP_ID=108;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
++----------+--------+-------------+------------+------------+---------------------+
+4 rows in set (0.00 sec)
+
+mysql> DELETE FROM EMPLOYEES WHERE EMP_ID=107;
+Query OK, 1 row affected (0.07 sec)
+
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
+|        5 |   NULL | DELETE      |   25000.00 |       NULL | 2026-10-08 12:31:20 |
++----------+--------+-------------+------------+------------+---------------------+
+5 rows in set (0.00 sec)
+
+mysql> SHOW TRIGGERS;
++------------------------+--------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger                | Event  | Table     | Statement                                                                                                                                                        | Timing | Created                | sql_mode                                                                                                              | Definer        | character_set_client | collation_connection | Database Collation |
++------------------------+--------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| trg_beforf_insert_sal  | INSERT | employees | begin
+ if new.salary<20000 then
+ signal sqlstate '45000'
+ set message_text='salary cannot be less than 20000';
+ end if;
+end                                      | BEFORE | 2026-10-08 11:39:37.27 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_insert_sal   | INSERT | employees | begin
+ insert into employee_audit
+ (emp_id, action_type, new_salary, action_time)
+ values
+ (new.emp_id,'INSERT',NEW.SALARY,NOW());
+end                           | AFTER  | 2026-10-08 11:50:50.09 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_beforf_update_sal  | UPDATE | employees | begin
+ if new.salary<old.salary then
+ signal sqlstate '45000'
+ set message_text='new salary cannot be redce';
+ end if;
+end                                       | BEFORE | 2026-10-08 12:01:15.44 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_update_sal   | UPDATE | employees | begin
+   insert into employee_audit
+ (emp_id, action_type, old_salary, new_salary, action_time)
+ values
+ (OLD.emp_id,'UPDATE',OLD.SALARY,NEW.SALARY,NOW());
+ end | AFTER  | 2026-10-08 12:15:40.12 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg__before_delete_sal | DELETE | employees | begin
+   if old.department='it' then
+   signal sqlstate '45000'
+   set message_text='You cannot delete IT employees';
+   end if;
+
+  end                          | BEFORE | 2026-10-08 12:24:18.52 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_delete_sal   | DELETE | employees | begin
+   insert into employee_audit
+ (emp_id, action_type, old_salary, action_time)
+ values
+ (emp_id,'DELETE',OLD.SALARY,NOW());
+ end                            | AFTER  | 2026-10-08 12:29:07.71 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
++------------------------+--------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+6 rows in set (0.07 sec)
+
+mysql> DROP TRIGGER trg_after_delete_sal;
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_delete_sal
+    -> after delete
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salary, action_time)
+    ->  values
+    ->  (OLD.emp_id,'DELETE',OLD.SALARY,NOW());
+    ->  end //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> delimiter ;
+mysql> DELETE FROM EMPLOYEES WHERE EMP_ID=105;
+Query OK, 1 row affected (0.07 sec)
+
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
+|        5 |   NULL | DELETE      |   25000.00 |       NULL | 2026-10-08 12:31:20 |
+|        6 |    105 | DELETE      |   40000.00 |       NULL | 2026-10-08 12:34:40 |
++----------+--------+-------------+------------+------------+---------------------+
+6 rows in set (0.00 sec)
+
+mysql>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 20
+Server version: 8.0.46 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2026, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> help
+
+For information about MySQL products and services, visit:
+   http://www.mysql.com/
+For developer information, including the MySQL Reference Manual, visit:
+   http://dev.mysql.com/
+To buy MySQL Enterprise support, training, or other products, visit:
+   https://shop.mysql.com/
+
+List of all MySQL commands:
+Note that all text commands must be first on line and end with ';'
+?         (\?) Synonym for `help'.
+clear     (\c) Clear the current input statement.
+connect   (\r) Reconnect to the server. Optional arguments are db and host.
+delimiter (\d) Set statement delimiter.
+ego       (\G) Send command to mysql server, display result vertically.
+exit      (\q) Exit mysql. Same as quit.
+go        (\g) Send command to mysql server.
+help      (\h) Display this help.
+notee     (\t) Don't write into outfile.
+print     (\p) Print current command.
+prompt    (\R) Change your mysql prompt.
+quit      (\q) Quit mysql.
+rehash    (\#) Rebuild completion hash.
+source    (\.) Execute an SQL script file. Takes a file name as an argument.
+status    (\s) Get status information from the server.
+system    (\!) Execute a system shell command, if enabled
+tee       (\T) Set outfile [to_outfile]. Append everything into given outfile.
+use       (\u) Use another database. Takes database name as argument.
+charset   (\C) Switch to another charset. Might be needed for processing binlog with multi-byte charsets.
+warnings  (\W) Show warnings after every statement.
+nowarning (\w) Don't show warnings after every statement.
+resetconnection(\x) Clean session context.
+query_attributes Sets string parameters (name1 value1 name2 value2 ...) for the next query to pick up.
+ssl_session_data_print Serializes the current SSL session data to stdout or file
+
+For server side help, type 'help contents'
+
+mysql> use pfs7;
+Database changed
+mysql> show tables;
++----------------+
+| Tables_in_pfs7 |
++----------------+
+| customers      |
+| orders         |
+| products       |
+| student        |
+| students       |
++----------------+
+5 rows in set (0.01 sec)
+
+mysql>
+mysql>
+mysql> CREATE TABLE Employees (
+    ->     emp_id INT PRIMARY KEY,
+    ->     emp_name VARCHAR(50),
+    ->     department VARCHAR(30),
+    ->     salary DECIMAL(10,2),
+    ->     experience INT,
+    ->     city VARCHAR(30)
+    -> );
+Query OK, 0 rows affected (0.08 sec)
+
+mysql>
+mysql>
+mysql>
+mysql> INSERT INTO Employees VALUES
+    -> (101,'Rahul','IT',65000,5,'Hyderabad'),
+    -> (102,'Priya','HR',45000,3,'Chennai'),
+    -> (103,'Amit','Finance',70000,6,'Bangalore'),
+    -> (104,'Sneha','IT',80000,8,'Hyderabad'),
+    -> (105,'Kiran','Sales',40000,2,'Pune');
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql>
+mysql>
+mysql>
+mysql>
+mysql> CREATE TABLE Employee_Audit(
+    ->     audit_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     emp_id INT,
+    ->     action_type VARCHAR(20),
+    ->     old_salary DECIMAL(10,2),
+    ->     new_salary DECIMAL(10,2),
+    ->     action_time DATETIME
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> select*from employees;
++--------+----------+------------+----------+------------+-----------+
+| emp_id | emp_name | department | salary   | experience | city      |
++--------+----------+------------+----------+------------+-----------+
+|    101 | Rahul    | IT         | 65000.00 |          5 | Hyderabad |
+|    102 | Priya    | HR         | 45000.00 |          3 | Chennai   |
+|    103 | Amit     | Finance    | 70000.00 |          6 | Bangalore |
+|    104 | Sneha    | IT         | 80000.00 |          8 | Hyderabad |
+|    105 | Kiran    | Sales      | 40000.00 |          2 | Pune      |
++--------+----------+------------+----------+------------+-----------+
+5 rows in set (0.00 sec)
+
+mysql> desc employees_audit;
+ERROR 1146 (42S02): Table 'pfs7.employees_audit' doesn't exist
+mysql> desc employee_audit;
++-------------+---------------+------+-----+---------+----------------+
+| Field       | Type          | Null | Key | Default | Extra          |
++-------------+---------------+------+-----+---------+----------------+
+| audit_id    | int           | NO   | PRI | NULL    | auto_increment |
+| emp_id      | int           | YES  |     | NULL    |                |
+| action_type | varchar(20)   | YES  |     | NULL    |                |
+| old_salary  | decimal(10,2) | YES  |     | NULL    |                |
+| new_salary  | decimal(10,2) | YES  |     | NULL    |                |
+| action_time | datetime      | YES  |     | NULL    |                |
++-------------+---------------+------+-----+---------+----------------+
+6 rows in set (0.07 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_beforf_insert_sal
+    -> before insert
+    -> on employees
+    -> for each row
+    -> begin
+    ->  if new.salary<20000 then
+    ->  signal sqlstate '45000'
+    ->  set message_text='salary cannot be less than 20000';
+    ->  end if;
+    -> end //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> delimiter ;
+mysql> insert into employess values
+    -> (101,'Ramesh','IT',16289,6,'vizag');
+ERROR 1146 (42S02): Table 'pfs7.employess' doesn't exist
+mysql> insert into employees values
+    -> (101,'Ramesh','IT',16289,6,'vizag');
+ERROR 1644 (45000): salary cannot be less than 20000
+mysql> insert into employess values
+    -> (101,'Ramesh','IT',21000,6,'vizag');
+ERROR 1146 (42S02): Table 'pfs7.employess' doesn't exist
+mysql> insert into employees values
+    -> (101,'Ramesh','IT',21000,6,'vizag');
+ERROR 1062 (23000): Duplicate entry '101' for key 'employees.PRIMARY'
+mysql> insert into employees values
+    -> (106,'Ramesh','IT',21000,6,'vizag');
+Query OK, 1 row affected (0.07 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_insert_sal
+    -> after insert
+    -> on employees
+    -> for each row
+    -> begin
+    ->  insert into employee_audit
+    ->  (emp_id, action_type, new_salary, action_time)
+    ->  values
+    ->  (new.emp_id,'INSERT',NEW.SALARY,NOW());
+    -> end //
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> delimiter ;
+mysql> INSERT INTO EMPLOYEES VALUES
+    -> (107,'RAKESH','BPO',20000,2,'VIZAG');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> SELECT*FROM EMPLOYEES;
++--------+----------+------------+----------+------------+-----------+
+| emp_id | emp_name | department | salary   | experience | city      |
++--------+----------+------------+----------+------------+-----------+
+|    101 | Rahul    | IT         | 65000.00 |          5 | Hyderabad |
+|    102 | Priya    | HR         | 45000.00 |          3 | Chennai   |
+|    103 | Amit     | Finance    | 70000.00 |          6 | Bangalore |
+|    104 | Sneha    | IT         | 80000.00 |          8 | Hyderabad |
+|    105 | Kiran    | Sales      | 40000.00 |          2 | Pune      |
+|    106 | Ramesh   | IT         | 21000.00 |          6 | vizag     |
+|    107 | RAKESH   | BPO        | 20000.00 |          2 | VIZAG     |
++--------+----------+------------+----------+------------+-----------+
+7 rows in set (0.00 sec)
+
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
++----------+--------+-------------+------------+------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> INSERT INTO EMPLOYEES VALUES
+    -> (108,'RENUKA','ACTORS',50000,2,Chenni);
+ERROR 1054 (42S22): Unknown column 'Chenni' in 'field list'
+mysql> (108,'RENUKA','ACTORS',50000,2,'Chennai');
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '108,'RENUKA','ACTORS',50000,2,'Chennai')' at line 1
+mysql> INSERT INTO EMPLOYEES VALUES
+    -> (108,'RENUKA','ACTORS',50000,2,'Chennai');
+Query OK, 1 row affected (0.05 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_beforf_update_sal
+    -> before update
+    -> on employees
+    -> for each row
+    -> begin
+    ->  if new.salary<old.salary then
+    ->  signal sqlstate '45000'
+    ->  set message_text='new salary cannot be redce';
+    ->  end if;
+    -> end //
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> delimiter ;
+mysql> update employees set salary=50000 where emp_id=101;
+ERROR 1644 (45000): new salary cannot be redce
+mysql> update employees set salary=65001.76 where emp_id=101;
+Query OK, 1 row affected (0.07 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> SELECT*FROM EMPLOYEES;
++--------+----------+------------+----------+------------+-----------+
+| emp_id | emp_name | department | salary   | experience | city      |
++--------+----------+------------+----------+------------+-----------+
+|    101 | Rahul    | IT         | 65001.76 |          5 | Hyderabad |
+|    102 | Priya    | HR         | 45000.00 |          3 | Chennai   |
+|    103 | Amit     | Finance    | 70000.00 |          6 | Bangalore |
+|    104 | Sneha    | IT         | 80000.00 |          8 | Hyderabad |
+|    105 | Kiran    | Sales      | 40000.00 |          2 | Pune      |
+|    106 | Ramesh   | IT         | 21000.00 |          6 | vizag     |
+|    107 | RAKESH   | BPO        | 20000.00 |          2 | VIZAG     |
+|    108 | RENUKA   | ACTORS     | 50000.00 |          2 | Chennai   |
++--------+----------+------------+----------+------------+-----------+
+8 rows in set (0.00 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_update_sal
+    -> after update
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salry, new_salary, action_time)
+    ->  values
+    ->  (OLD.emp_id,'UPDATE',OLD.SALARY,NEW.SALARY,NOW());
+    ->  end //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> delimiter ;
+mysql>
+mysql>
+mysql> UPDATE EMPLOYEES SET SALARY=60000 WHERE EMP_id=102;
+ERROR 1054 (42S22): Unknown column 'old_salry' in 'field list'
+mysql> show triggers;
++-----------------------+--------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger               | Event  | Table     | Statement                                                                                                                                                       | Timing | Created                | sql_mode                                                                                                              | Definer        | character_set_client | collation_connection | Database Collation |
++-----------------------+--------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| trg_beforf_insert_sal | INSERT | employees | begin
+ if new.salary<20000 then
+ signal sqlstate '45000'
+ set message_text='salary cannot be less than 20000';
+ end if;
+end                                     | BEFORE | 2026-10-08 11:39:37.27 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_insert_sal  | INSERT | employees | begin
+ insert into employee_audit
+ (emp_id, action_type, new_salary, action_time)
+ values
+ (new.emp_id,'INSERT',NEW.SALARY,NOW());
+end                          | AFTER  | 2026-10-08 11:50:50.09 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_beforf_update_sal | UPDATE | employees | begin
+ if new.salary<old.salary then
+ signal sqlstate '45000'
+ set message_text='new salary cannot be redce';
+ end if;
+end                                      | BEFORE | 2026-10-08 12:01:15.44 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_update_sal  | UPDATE | employees | begin
+   insert into employee_audit
+ (emp_id, action_type, old_salry, new_salary, action_time)
+ values
+ (OLD.emp_id,'UPDATE',OLD.SALARY,NEW.SALARY,NOW());
+ end | AFTER  | 2026-10-08 12:14:29.18 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
++-----------------------+--------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+4 rows in set (0.01 sec)
+
+mysql> drop trigger trg_after_update_sal;
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_update_sal
+    -> after update
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salary, new_salary, action_time)
+    ->  values
+    ->  (OLD.emp_id,'UPDATE',OLD.SALARY,NEW.SALARY,NOW());
+    ->  end //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> delimiter ;
+mysql>
+mysql>
+mysql> UPDATE EMPLOYEES SET SALARY=60000 WHERE EMP_id=102;
+Query OK, 1 row affected (0.05 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select*from employees;
++--------+----------+------------+----------+------------+-----------+
+| emp_id | emp_name | department | salary   | experience | city      |
++--------+----------+------------+----------+------------+-----------+
+|    101 | Rahul    | IT         | 65001.76 |          5 | Hyderabad |
+|    102 | Priya    | HR         | 60000.00 |          3 | Chennai   |
+|    103 | Amit     | Finance    | 70000.00 |          6 | Bangalore |
+|    104 | Sneha    | IT         | 80000.00 |          8 | Hyderabad |
+|    105 | Kiran    | Sales      | 40000.00 |          2 | Pune      |
+|    106 | Ramesh   | IT         | 21000.00 |          6 | vizag     |
+|    107 | RAKESH   | BPO        | 20000.00 |          2 | VIZAG     |
+|    108 | RENUKA   | ACTORS     | 50000.00 |          2 | Chennai   |
++--------+----------+------------+----------+------------+-----------+
+8 rows in set (0.00 sec)
+
+mysql> select*from employee_audit;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
++----------+--------+-------------+------------+------------+---------------------+
+3 rows in set (0.00 sec)
+
+mysql> update employees set salary=25000 where emp_id=107;
+Query OK, 1 row affected (0.05 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select*from employee_audit;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
++----------+--------+-------------+------------+------------+---------------------+
+4 rows in set (0.00 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg__before_delete_sal
+    -> before delete
+    -> on employees
+    -> for each row
+    -> begin
+    ->    if old.department='it' then
+    ->    signal sqlstate '45000'
+    ->    set message_text='You cannot delete IT employees';
+    ->    end if;
+    ->
+    ->   end //
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> delimiter ;
+mysql> delect from employees where emp_id=106;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'delect from employees where emp_id=106' at line 1
+mysql> delete from employees where emp_id=106;
+ERROR 1644 (45000): You cannot delete IT employees
+mysql> delete from employees where emp_id=108;
+Query OK, 1 row affected (0.10 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_delete_sal
+    -> after delete
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salary, new_salary, action_time)
+    ->  values
+    ->  (emp_id,'DELETE',OLD.SALARY,NEW.SALARY,NOW());
+    ->  end //
+ERROR 1363 (HY000): There is no NEW row in on DELETE trigger
+mysql> delimiter ;
+mysql> Delimiter //
+mysql> create trigger trg_after_delete_sal
+    -> after delete
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salary, action_time)
+    ->  values
+    ->  (emp_id,'DELETE',OLD.SALARY,NOW());
+    ->  end //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> delimiter ;
+mysql> DELETE FROM EMPLOYEES WHERE EMP_ID=106;
+ERROR 1644 (45000): You cannot delete IT employees
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
++----------+--------+-------------+------------+------------+---------------------+
+4 rows in set (0.00 sec)
+
+mysql> DELETE FROM EMPLOYEES WHERE EMP_ID=108;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
++----------+--------+-------------+------------+------------+---------------------+
+4 rows in set (0.00 sec)
+
+mysql> DELETE FROM EMPLOYEES WHERE EMP_ID=107;
+Query OK, 1 row affected (0.07 sec)
+
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
+|        5 |   NULL | DELETE      |   25000.00 |       NULL | 2026-10-08 12:31:20 |
++----------+--------+-------------+------------+------------+---------------------+
+5 rows in set (0.00 sec)
+
+mysql> SHOW TRIGGERS;
++------------------------+--------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| Trigger                | Event  | Table     | Statement                                                                                                                                                        | Timing | Created                | sql_mode                                                                                                              | Definer        | character_set_client | collation_connection | Database Collation |
++------------------------+--------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+| trg_beforf_insert_sal  | INSERT | employees | begin
+ if new.salary<20000 then
+ signal sqlstate '45000'
+ set message_text='salary cannot be less than 20000';
+ end if;
+end                                      | BEFORE | 2026-10-08 11:39:37.27 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_insert_sal   | INSERT | employees | begin
+ insert into employee_audit
+ (emp_id, action_type, new_salary, action_time)
+ values
+ (new.emp_id,'INSERT',NEW.SALARY,NOW());
+end                           | AFTER  | 2026-10-08 11:50:50.09 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_beforf_update_sal  | UPDATE | employees | begin
+ if new.salary<old.salary then
+ signal sqlstate '45000'
+ set message_text='new salary cannot be redce';
+ end if;
+end                                       | BEFORE | 2026-10-08 12:01:15.44 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_update_sal   | UPDATE | employees | begin
+   insert into employee_audit
+ (emp_id, action_type, old_salary, new_salary, action_time)
+ values
+ (OLD.emp_id,'UPDATE',OLD.SALARY,NEW.SALARY,NOW());
+ end | AFTER  | 2026-10-08 12:15:40.12 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg__before_delete_sal | DELETE | employees | begin
+   if old.department='it' then
+   signal sqlstate '45000'
+   set message_text='You cannot delete IT employees';
+   end if;
+
+  end                          | BEFORE | 2026-10-08 12:24:18.52 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
+| trg_after_delete_sal   | DELETE | employees | begin
+   insert into employee_audit
+ (emp_id, action_type, old_salary, action_time)
+ values
+ (emp_id,'DELETE',OLD.SALARY,NOW());
+ end                            | AFTER  | 2026-10-08 12:29:07.71 | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION | root@localhost | utf8mb4              | utf8mb4_0900_ai_ci   | utf8mb4_0900_ai_ci |
++------------------------+--------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+------------------------+-----------------------------------------------------------------------------------------------------------------------+----------------+----------------------+----------------------+--------------------+
+6 rows in set (0.07 sec)
+
+mysql> DROP TRIGGER trg_after_delete_sal;
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> Delimiter //
+mysql> create trigger trg_after_delete_sal
+    -> after delete
+    -> on employees
+    -> for each row
+    -> begin
+    ->    insert into employee_audit
+    ->  (emp_id, action_type, old_salary, action_time)
+    ->  values
+    ->  (OLD.emp_id,'DELETE',OLD.SALARY,NOW());
+    ->  end //
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> delimiter ;
+mysql> DELETE FROM EMPLOYEES WHERE EMP_ID=105;
+Query OK, 1 row affected (0.07 sec)
+
+mysql> SELECT*FROM EMPLOYEE_AUDIT;
++----------+--------+-------------+------------+------------+---------------------+
+| audit_id | emp_id | action_type | old_salary | new_salary | action_time         |
++----------+--------+-------------+------------+------------+---------------------+
+|        1 |    107 | INSERT      |       NULL |   20000.00 | 2026-10-08 11:55:16 |
+|        2 |    108 | INSERT      |       NULL |   50000.00 | 2026-10-08 11:58:49 |
+|        3 |    102 | UPDATE      |   45000.00 |   60000.00 | 2026-10-08 12:15:41 |
+|        4 |    107 | UPDATE      |   20000.00 |   25000.00 | 2026-10-08 12:17:31 |
+|        5 |   NULL | DELETE      |   25000.00 |       NULL | 2026-10-08 12:31:20 |
+|        6 |    105 | DELETE      |   40000.00 |       NULL | 2026-10-08 12:34:40 |
++----------+--------+-------------+------------+------------+---------------------+
+6 rows in set (0.00 sec)
+
+mysql>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
